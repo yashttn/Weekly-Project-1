@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/option_menu_add_user"
+        android:title="Add User" />
+    <item
+        android:id="@+id/option_menu_update_user"
+        android:title="Update User" />
+    <item
+        android:id="@+id/option_menu_delete_user"
+        android:title="Delete User" />
+    <item
+        android:id="@+id/option_menu_logout_user"
+        android:title="Logout" />
+
+</menu>
