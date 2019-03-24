@@ -1,4 +1,4 @@
-package com.example.sample;
+package com.example.sample.RetrofitCallbacks;
 
 import java.util.concurrent.TimeUnit;
 

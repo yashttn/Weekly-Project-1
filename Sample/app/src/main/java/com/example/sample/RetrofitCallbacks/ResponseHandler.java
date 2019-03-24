@@ -1,6 +1,8 @@
-package com.example.sample;
+package com.example.sample.RetrofitCallbacks;
 
 import android.content.Context;
+
+import com.example.sample.Models.BaseResponseModel;
 
 import java.net.ConnectException;
 import java.net.UnknownHostException;

@@ -1,4 +1,4 @@
-package com.example.sample;
+package com.example.sample.DatabaseHelper;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static com.example.sample.GlobalConstants.*;
+import static com.example.sample.GlobalConstants.GlobalConstants.*;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -25,18 +25,18 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insertDataInDB(SQLiteDatabase database, String employeeName, String employeePhone, String employeeAddress) {
+    public void insertDataInDB(SQLiteDatabase database, int userId, String userFirstName, String userLastname, String userAvatar) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_ID, employeeName);
-        contentValues.put(COLUMN_FIRST_NAME, employeeName);
-        contentValues.put(COLUMN_LAST_NAME, employeePhone);
-        contentValues.put(COLUMN_AVATAR, employeeAddress);
-        database.insert(TABLE_NAME, null, contentValues);
+        contentValues.put(COLUMN_ID, userId);
+        contentValues.put(COLUMN_FIRST_NAME, userFirstName);
+        contentValues.put(COLUMN_LAST_NAME, userLastname);
+        contentValues.put(COLUMN_AVATAR, userAvatar);
+        database.insert(TABLE_NAME1, null, contentValues);
     }
 
-    Cursor fetchDataFromDB(SQLiteDatabase database) {
+    public Cursor fetchDataFromDB(SQLiteDatabase database) {
         String[] columns = new String[]{COLUMN_ID, COLUMN_FIRST_NAME, COLUMN_LAST_NAME, COLUMN_AVATAR};
-        Cursor cursor = database.query(TABLE_NAME, columns, null, null, null, null, null);
+        Cursor cursor = database.query(TABLE_NAME1, columns, null, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
         }

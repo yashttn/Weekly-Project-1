@@ -1,5 +1,6 @@
-package com.example.sample;
+package com.example.sample.Models;
 
+import com.example.sample.Models.BaseResponseModel;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

@@ -1,11 +1,11 @@
-package com.example.sample;
+package com.example.sample.Models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class UsersModel {
+public class MetaUsersModel {
 
     @SerializedName("page")
     @Expose
@@ -21,7 +21,7 @@ public class UsersModel {
     private Integer totalPages;
     @SerializedName("data")
     @Expose
-    private List<Datum> data = null;
+    private List<UsersModel> data = null;
 
     public Integer getPage() {
         return page;
@@ -55,11 +55,11 @@ public class UsersModel {
         this.totalPages = totalPages;
     }
 
-    public List<Datum> getData() {
+    public List<UsersModel> getData() {
         return data;
     }
 
-    public void setData(List<Datum> data) {
+    public void setData(List<UsersModel> data) {
         this.data = data;
     }
 

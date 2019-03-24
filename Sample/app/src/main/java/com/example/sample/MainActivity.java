@@ -3,16 +3,31 @@ package com.example.sample;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
-import static com.example.sample.GlobalConstants.*;
+import com.example.sample.DataManager.DataManager;
+import com.example.sample.DataManager.IResponseListener;
+import com.example.sample.DatabaseHelper.DBHelper;
+import com.example.sample.LoginScreen.IDetailsListener;
+import com.example.sample.LoginScreen.LoginScreenFragment;
+import com.example.sample.Models.UsersModel;
+import com.example.sample.SplashScreen.SplashScreenFragment;
+import com.example.sample.UsersListScreen.IDataChangeListener;
+import com.example.sample.UsersListScreen.UsersListScreenFragment;
 
-public class MainActivity extends AppCompatActivity implements LoginScreenFragment.ILoginFragmentCommunicator {
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.sample.GlobalConstants.GlobalConstants.*;
+
+public class MainActivity extends AppCompatActivity implements IDetailsListener, IResponseListener, IDataChangeListener {
 
     SharedPreferences preferences;
     FragmentManager fragmentManager;
@@ -20,6 +35,9 @@ public class MainActivity extends AppCompatActivity implements LoginScreenFragme
     DataManager dataManager;
     DBHelper dbHelper;
     SQLiteDatabase database;
+    Bundle bundle;
+    LoginScreenFragment loginScreenFragment;
+    UsersListScreenFragment usersListScreenFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +45,11 @@ public class MainActivity extends AppCompatActivity implements LoginScreenFragme
         setContentView(R.layout.activity_main);
 
         starters();
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (isFirstTime()) {
             showSplashScreen();
         } else {
@@ -35,33 +57,18 @@ public class MainActivity extends AppCompatActivity implements LoginScreenFragme
         }
     }
 
-    /**
-     * starters is used to intialize all the first things
-     * at the onCreate level of activity
-     */
     private void starters() {
         preferences = getSharedPreferences("Mocky", MODE_PRIVATE);
         fragmentManager = getSupportFragmentManager();
-        dataManager = new DataManager();
+        dataManager = new DataManager(this);
         dbHelper = new DBHelper(this);
         database = dbHelper.getWritableDatabase();
     }
 
-    /**
-     * Used to check, is it the first time of user in the app?
-     *
-     * @return It returns boolean, which tells whether is it
-     * the first time of user in the app or not
-     */
     private boolean isFirstTime() {
         return !preferences.contains("first_time");
     }
 
-    /**
-     * If it is the first time of user in the app,
-     * showSplashScreen() will show a small splash screen,
-     * SPLASH_SCREEN_TIMEOUT of 5 seconds.
-     */
     private void showSplashScreen() {
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, new SplashScreenFragment()).addToBackStack(null).commit();
@@ -75,63 +82,68 @@ public class MainActivity extends AppCompatActivity implements LoginScreenFragme
         }, SPLASH_SCREEN_TIMEOUT);
     }
 
-    /**
-     * shows login screen fragment
-     */
     private void showLoginScreen() {
-        LoginScreenFragment loginScreenFragment = new LoginScreenFragment();
-        loginScreenFragment.setLoginFragmentCommunicator(this);
+        loginScreenFragment = new LoginScreenFragment();
+        loginScreenFragment.setDetailsListener(this);   // Connecting IOnDetailsListener
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, loginScreenFragment).addToBackStack(null).commit();
+
     }
 
+    private void makeListUsersRequest() {
+        dataManager.listUsers(dbHelper, database);
+    }
 
     private void showListUsersScreen() {
-        UsersListScreenFragment usersListScreenFragment = new UsersListScreenFragment();
+        usersListScreenFragment = new UsersListScreenFragment();
+        usersListScreenFragment.setDataChangeListener((IDataChangeListener) this);
+        if (bundle != null) {
+            usersListScreenFragment.setArguments(bundle);
+        }
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, usersListScreenFragment).addToBackStack(null).commit();
     }
 
-    /**
-     * Overriden function from login screen fragment
-     * sends login request
-     *
-     * @param email    Email sent from login screen
-     * @param password Password send from login screen
-     */
     @Override
-    public void sendLoginDetails(String email, String password) {
-        Log.v("yash", email + password);
-        if (dataManager.loginUserRequest(this, email, password)) {
-            Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-            fragmentManager.popBackStack();
-            showListUsersScreen();
+    public void onDetailsReceived(String email, String password, int sent_by) {
+        if (sent_by == SIGNUP_REQUEST) {
+            dataManager.registerUserRequest(email, password);
         } else {
-            Toast.makeText(this, "Login Failed", Toast.LENGTH_SHORT).show();
+            dataManager.loginUserRequest(email, password);
         }
     }
 
-    /**
-     * Overriden function from login screen fragment
-     * sends registration request
-     *
-     * @param email    Email sent from login screen
-     * @param password Password send from login screen
-     */
+    // IResponseListener
     @Override
-    public void sendRegistrationDetails(String email, String password) {
-        Log.v("yash", email + password);
-        if (dataManager.registerUserRequest(this, email, password)) {
-            Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Registration Failed", Toast.LENGTH_SHORT).show();
+    public void onResponseReceived(boolean response_successful, int sent_by) {
+        if (sent_by == SIGNUP_REQUEST) {
+            if (response_successful) {
+                Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Registration Failed", Toast.LENGTH_SHORT).show();
+            }
+        } else if (sent_by == LOGIN_REQUEST) {
+            if (response_successful) {
+                Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+                fragmentManager.popBackStack();
+                makeListUsersRequest();
+            } else {
+                Toast.makeText(this, "Login Failed", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
+    // IResponseListener
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        dbHelper.close();
-        database.close();
+    public void onUsersListReceived(List<UsersModel> usersModelList) {
+        bundle = new Bundle();
+        bundle.putParcelableArrayList("users_list", (ArrayList<? extends Parcelable>) usersModelList);
+        showListUsersScreen();
+
+    }
+
+    @Override
+    public void getMoreData(int totalItemsPresent) {
+        dataManager.getMoreUserDetails(totalItemsPresent);
     }
 }

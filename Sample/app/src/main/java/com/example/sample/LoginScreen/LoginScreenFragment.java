@@ -1,4 +1,4 @@
-package com.example.sample;
+package com.example.sample.LoginScreen;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,16 +11,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.sample.R;
+
 import java.util.regex.Pattern;
 
-import static com.example.sample.GlobalConstants.*;
+import static com.example.sample.GlobalConstants.GlobalConstants.*;
 
 public class LoginScreenFragment extends Fragment {
 
     EditText email_et, password_et;
     Button login_btn, sign_up_btn;
     String email_text, password_text;
-    ILoginFragmentCommunicator loginFragmentCommunicator;
+    IDetailsListener detailsListener;
 
     @Nullable
     @Override
@@ -37,13 +39,14 @@ public class LoginScreenFragment extends Fragment {
         login_btn = view.findViewById(R.id.button_login);
         sign_up_btn = view.findViewById(R.id.button_signup);
 
+
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 textExtractor();
                 if (nullCheck()) {
                     if (validCheck()) {
-                        loginFragmentCommunicator.sendLoginDetails(email_text, password_text);
+                        detailsListener.onDetailsReceived(email_text, password_text, LOGIN_REQUEST);
                     } else {
                         Toast.makeText(v.getContext(), "Email or Password field not correct!", Toast.LENGTH_SHORT).show();
                     }
@@ -57,7 +60,7 @@ public class LoginScreenFragment extends Fragment {
                 textExtractor();
                 if (nullCheck()) {
                     if (validCheck()) {
-                        loginFragmentCommunicator.sendRegistrationDetails(email_text, password_text);
+                        detailsListener.onDetailsReceived(email_text, password_text, SIGNUP_REQUEST);
                     } else {
                         Toast.makeText(v.getContext(), "Email or Password field not correct!", Toast.LENGTH_SHORT).show();
                     }
@@ -66,10 +69,6 @@ public class LoginScreenFragment extends Fragment {
         });
     }
 
-
-    /**
-     * It extracts strings from edittexts of username and password.
-     */
     private void textExtractor() {
         email_text = email_et.getText().toString();
         password_text = password_et.getText().toString();
@@ -77,18 +76,10 @@ public class LoginScreenFragment extends Fragment {
         password_et.setText("");
     }
 
-    /**
-     * It checks for null value of strings
-     * @return whether email_text and password_text contains null
-     */
     private boolean nullCheck() {
         return email_text != null && password_text != null;
     }
 
-    /**
-     * It checks for blank value of strings & email validation.
-     * @return whether strings are blank and email is valid or not.
-     */
     private boolean validCheck() {
         if (!email_text.equals("") && !password_text.equals("")) {
             Pattern pattern = Pattern.compile(EMAIL_REGEX);
@@ -97,20 +88,8 @@ public class LoginScreenFragment extends Fragment {
         return false;
     }
 
-    /**
-     * It initializes this class's ILoginFragmentCommunicator's instance
-     * with the "this" provided in other activities
-     * @param loginFragmentCommunicator ILoginFragmentCommunicator's instance
-     */
-    public void setLoginFragmentCommunicator(ILoginFragmentCommunicator loginFragmentCommunicator) {
-        this.loginFragmentCommunicator = loginFragmentCommunicator;
+    public void setDetailsListener(IDetailsListener detailsListener) {
+        this.detailsListener = detailsListener;
     }
 
-    /**
-     * used to communicate with other activities
-     */
-    interface ILoginFragmentCommunicator {
-        void sendLoginDetails(String email, String password);
-        void sendRegistrationDetails(String email, String password);
-    }
 }

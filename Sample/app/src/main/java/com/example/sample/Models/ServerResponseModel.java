@@ -1,9 +1,10 @@
-package com.example.sample;
+package com.example.sample.Models;
 
+import com.example.sample.Models.BaseResponseModel;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ServerResponse extends BaseResponseModel{
+public class ServerResponseModel extends BaseResponseModel {
     @SerializedName("token")
     @Expose
     private String token;
