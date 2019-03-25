@@ -1,4 +1,4 @@
-package com.example.sample.DataManager;
+package com.example.sample.data_manager;
 
 import com.example.sample.Models.UsersModel;
 

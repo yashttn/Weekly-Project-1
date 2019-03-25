@@ -4,17 +4,17 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.example.sample.DataManager.DataManager;
-import com.example.sample.DataManager.IResponseListener;
-import com.example.sample.DatabaseHelper.DBHelper;
+import com.example.sample.data_manager.DataManager;
+import com.example.sample.data_manager.IResponseListener;
+import com.example.sample.database_helper.DBHelper;
 import com.example.sample.LoginScreen.IDetailsListener;
 import com.example.sample.LoginScreen.LoginScreenFragment;
 import com.example.sample.Models.UsersModel;
@@ -63,6 +63,10 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
         dataManager = new DataManager(this);
         dbHelper = new DBHelper(this);
         database = dbHelper.getWritableDatabase();
+        ConstraintLayout coordinatorLayout = findViewById(R.id.constraint_layout);
+        Snackbar snackbar = Snackbar.make(coordinatorLayout, "Hey! Yashwant", Snackbar.LENGTH_LONG);
+        snackbar.show();
+
     }
 
     private boolean isFirstTime() {
@@ -96,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
 
     private void showListUsersScreen() {
         usersListScreenFragment = new UsersListScreenFragment();
-        usersListScreenFragment.setDataChangeListener((IDataChangeListener) this);
+        usersListScreenFragment.setDataChangeListener(this);
         if (bundle != null) {
             usersListScreenFragment.setArguments(bundle);
         }

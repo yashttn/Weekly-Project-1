@@ -1,10 +1,9 @@
-package com.example.sample.DataManager;
+package com.example.sample.data_manager;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
-import com.example.sample.DatabaseHelper.DBHelper;
+import com.example.sample.database_helper.DBHelper;
 import com.example.sample.Models.MetaUsersModel;
 import com.example.sample.Models.UsersModel;
 import com.example.sample.RetrofitCallbacks.ApiInterface;
