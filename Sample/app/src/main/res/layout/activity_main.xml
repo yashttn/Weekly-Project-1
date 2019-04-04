@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/constraint_layout"
     tools:context=".MainActivity">
 
     <FrameLayout
@@ -17,15 +16,5 @@
         app:layout_constraintTop_toTopOf="parent">
 
     </FrameLayout>
-
-    <android.support.design.widget.CoordinatorLayout
-        android:id="@+id/coordinator_layout_for_snackbar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-    </android.support.design.widget.CoordinatorLayout>
 
 </android.support.constraint.ConstraintLayout>

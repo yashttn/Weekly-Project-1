@@ -1,4 +1,4 @@
-package com.example.sample.GlobalConstants;
+package com.example.sample.global_constants;
 
 public class GlobalConstants {
 
@@ -11,18 +11,17 @@ public class GlobalConstants {
     // Database Constants
     public static final String DB_NAME = "Mocky";
     public static final int DB_VERSION = 1;
-    public static final String TABLE_NAME1 = "mocky_users";
+    public static final String TABLE_NAME = "mocky_users";
     public static final String COLUMN_ID = "mocky_id";
     public static final String COLUMN_FIRST_NAME = "mocky_first_name";
     public static final String COLUMN_LAST_NAME = "mocky_last_name";
     public static final String COLUMN_AVATAR = "mocky_avatar";
-    public static final String COLUMN_PAGE = "mocky_avatar";
-    public static final String CREATE_TABLE_COMMAND = "CREATE TABLE " + TABLE_NAME1 + " ( "
+    public static final String CREATE_TABLE_COMMAND = "CREATE TABLE " + TABLE_NAME + " ( "
             + COLUMN_ID + " INTEGER PRIMARY KEY, "
             + COLUMN_FIRST_NAME + " VARCHAR(20), "
             + COLUMN_LAST_NAME + " VARCHAR(20), "
             + COLUMN_AVATAR + " TEXT );";
-    public static final String DROP_TABLE_COMMAND = "DROP TABLE IF EXISTS " + TABLE_NAME1;
+    public static final String DROP_TABLE_COMMAND = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     // Login and Registration page Constants
     public static final int LOGIN_REQUEST = 1;
@@ -32,5 +31,5 @@ public class GlobalConstants {
     public static final int FIRST_PAGE = 1;
     public static final int SECOND_PAGE = 2;
     public static final int THIRD_PAGE = 3;
-    public static final int FOUTRTH_PAGE = 4;
+    public static final int FOURTH_PAGE = 4;
 }

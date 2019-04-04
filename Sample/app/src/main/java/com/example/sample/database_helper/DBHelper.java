@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import static com.example.sample.GlobalConstants.GlobalConstants.*;
+import static com.example.sample.global_constants.GlobalConstants.*;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -31,12 +31,12 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(COLUMN_FIRST_NAME, userFirstName);
         contentValues.put(COLUMN_LAST_NAME, userLastname);
         contentValues.put(COLUMN_AVATAR, userAvatar);
-        database.insert(TABLE_NAME1, null, contentValues);
+        database.insert(TABLE_NAME, null, contentValues);
     }
 
     public Cursor fetchDataFromDB(SQLiteDatabase database) {
         String[] columns = new String[]{COLUMN_ID, COLUMN_FIRST_NAME, COLUMN_LAST_NAME, COLUMN_AVATAR};
-        Cursor cursor = database.query(TABLE_NAME1, columns, null, null, null, null, null);
+        Cursor cursor = database.query(TABLE_NAME, columns, null, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
         }

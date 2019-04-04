@@ -1,4 +1,4 @@
-package com.example.sample.UsersListScreen;
+package com.example.sample.users_list_screen;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.sample.Models.UsersModel;
+import com.example.sample.models.UsersModel;
 import com.example.sample.R;
 
 import java.util.List;
@@ -17,10 +17,6 @@ import java.util.List;
 public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.UsersListViewHolder> {
 
     private List<UsersModel> usersModelList;
-
-    public UsersListAdapter(List<UsersModel> usersModelList) {
-        this.usersModelList = usersModelList;
-    }
 
     @NonNull
     @Override
@@ -38,6 +34,11 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
                 .load(usersModel.getAvatar()).into(usersListViewHolder.profile_image_iv);
     }
 
+    void setUsersModelList(List<UsersModel> usersModelList) {
+        this.usersModelList = usersModelList;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return usersModelList.size();
@@ -48,7 +49,7 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
         TextView user_id_tv, first_name_tv, last_name_tv;
         ImageView delete_user_iv, update_user_iv, profile_image_iv;
 
-        public UsersListViewHolder(@NonNull View itemView) {
+        UsersListViewHolder(@NonNull View itemView) {
             super(itemView);
 
             user_id_tv = itemView.findViewById(R.id.user_id_tv);

@@ -1,4 +1,4 @@
-package com.example.sample.SplashScreen;
+package com.example.sample.splash_screen;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

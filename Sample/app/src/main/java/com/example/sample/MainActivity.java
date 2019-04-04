@@ -3,9 +3,6 @@ package com.example.sample;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
-import android.os.Parcelable;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -15,17 +12,16 @@ import android.widget.Toast;
 import com.example.sample.data_manager.DataManager;
 import com.example.sample.data_manager.IResponseListener;
 import com.example.sample.database_helper.DBHelper;
-import com.example.sample.LoginScreen.IDetailsListener;
-import com.example.sample.LoginScreen.LoginScreenFragment;
-import com.example.sample.Models.UsersModel;
-import com.example.sample.SplashScreen.SplashScreenFragment;
-import com.example.sample.UsersListScreen.IDataChangeListener;
-import com.example.sample.UsersListScreen.UsersListScreenFragment;
+import com.example.sample.login_screen.IDetailsListener;
+import com.example.sample.login_screen.LoginScreenFragment;
+import com.example.sample.models.UsersModel;
+import com.example.sample.splash_screen.SplashScreenFragment;
+import com.example.sample.users_list_screen.IDataChangeListener;
+import com.example.sample.users_list_screen.UsersListScreenFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.sample.GlobalConstants.GlobalConstants.*;
+import static com.example.sample.global_constants.GlobalConstants.*;
 
 public class MainActivity extends AppCompatActivity implements IDetailsListener, IResponseListener, IDataChangeListener {
 
@@ -35,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
     DataManager dataManager;
     DBHelper dbHelper;
     SQLiteDatabase database;
-    Bundle bundle;
     LoginScreenFragment loginScreenFragment;
     UsersListScreenFragment usersListScreenFragment;
 
@@ -53,24 +48,29 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
         if (isFirstTime()) {
             showSplashScreen();
         } else {
-            showLoginScreen();
+            if (isSignedIn()) {
+                showUsersListScreen();
+            } else {
+                showLoginScreen();
+            }
         }
     }
 
     private void starters() {
         preferences = getSharedPreferences("Mocky", MODE_PRIVATE);
         fragmentManager = getSupportFragmentManager();
-        dataManager = new DataManager(this);
+        dataManager = new DataManager();
+        dataManager.setOnResponseListener(this);       // Connecting IOnDetailsListener
         dbHelper = new DBHelper(this);
         database = dbHelper.getWritableDatabase();
-        ConstraintLayout coordinatorLayout = findViewById(R.id.constraint_layout);
-        Snackbar snackbar = Snackbar.make(coordinatorLayout, "Hey! Yashwant", Snackbar.LENGTH_LONG);
-        snackbar.show();
-
     }
 
     private boolean isFirstTime() {
         return !preferences.contains("first_time");
+    }
+
+    private boolean isSignedIn() {
+        return !preferences.contains("signed_in");
     }
 
     private void showSplashScreen() {
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
             @Override
             public void run() {
                 fragmentManager.popBackStack();
-                preferences.edit().putBoolean("first_time", false).apply();
+                preferences.edit().putBoolean("first_time", true).apply();
                 showLoginScreen();
             }
         }, SPLASH_SCREEN_TIMEOUT);
@@ -91,35 +91,36 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
         loginScreenFragment.setDetailsListener(this);   // Connecting IOnDetailsListener
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, loginScreenFragment).addToBackStack(null).commit();
-
     }
 
-    private void makeListUsersRequest() {
-        dataManager.listUsers(dbHelper, database);
-    }
-
-    private void showListUsersScreen() {
+    private void showUsersListScreen() {
         usersListScreenFragment = new UsersListScreenFragment();
-        usersListScreenFragment.setDataChangeListener(this);
-        if (bundle != null) {
-            usersListScreenFragment.setArguments(bundle);
-        }
+        usersListScreenFragment.setDataChangeListener(this);    // Connecting IOnDataChangeListener
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, usersListScreenFragment).addToBackStack(null).commit();
+
+        int pageNo = preferences.getInt("page_no", 1);
+        dataManager.getUsersListRequest(pageNo);
+        preferences.edit().putInt("page_no", pageNo + 1).apply();
+    }
+
+    @Override
+    public void onUsersListReceived(List<UsersModel> usersModelList) {
+        usersListScreenFragment.setUsersData(usersModelList);
+    }
+
+    @Override
+    public void getMoreData() {
+        dataManager.getUsersListRequest(preferences.getInt("page_no", 1));
     }
 
     @Override
     public void onDetailsReceived(String email, String password, int sent_by) {
-        if (sent_by == SIGNUP_REQUEST) {
-            dataManager.registerUserRequest(email, password);
-        } else {
-            dataManager.loginUserRequest(email, password);
-        }
+        dataManager.loginRegisterUserRequest(email, password, sent_by);
     }
 
-    // IResponseListener
     @Override
-    public void onResponseReceived(boolean response_successful, int sent_by) {
+    public void onLoginRegisterResponseReceived(boolean response_successful, int sent_by) {
         if (sent_by == SIGNUP_REQUEST) {
             if (response_successful) {
                 Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show();
@@ -129,25 +130,20 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
         } else if (sent_by == LOGIN_REQUEST) {
             if (response_successful) {
                 Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+
                 fragmentManager.popBackStack();
-                makeListUsersRequest();
+                preferences.edit().putBoolean("signed_in", true).apply();
+                showUsersListScreen();
             } else {
                 Toast.makeText(this, "Login Failed", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    // IResponseListener
     @Override
-    public void onUsersListReceived(List<UsersModel> usersModelList) {
-        bundle = new Bundle();
-        bundle.putParcelableArrayList("users_list", (ArrayList<? extends Parcelable>) usersModelList);
-        showListUsersScreen();
-
-    }
-
-    @Override
-    public void getMoreData(int totalItemsPresent) {
-        dataManager.getMoreUserDetails(totalItemsPresent);
+    protected void onDestroy() {
+        super.onDestroy();
+        dbHelper.close();
+        database.close();
     }
 }

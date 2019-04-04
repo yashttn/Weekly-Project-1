@@ -1,4 +1,4 @@
-package com.example.sample.LoginScreen;
+package com.example.sample.login_screen;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,7 +15,7 @@ import com.example.sample.R;
 
 import java.util.regex.Pattern;
 
-import static com.example.sample.GlobalConstants.GlobalConstants.*;
+import static com.example.sample.global_constants.GlobalConstants.*;
 
 public class LoginScreenFragment extends Fragment {
 
@@ -44,12 +44,11 @@ public class LoginScreenFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 textExtractor();
-                if (nullCheck()) {
-                    if (validCheck()) {
-                        detailsListener.onDetailsReceived(email_text, password_text, LOGIN_REQUEST);
-                    } else {
-                        Toast.makeText(v.getContext(), "Email or Password field not correct!", Toast.LENGTH_SHORT).show();
-                    }
+                if (nullCheck() && validCheck()) {
+                    Toast.makeText(v.getContext(), "Please Wait...", Toast.LENGTH_SHORT).show();
+                    detailsListener.onDetailsReceived(email_text, password_text, LOGIN_REQUEST);
+                } else {
+                    Toast.makeText(v.getContext(), "Email or Password field not correct!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -58,13 +57,13 @@ public class LoginScreenFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 textExtractor();
-                if (nullCheck()) {
-                    if (validCheck()) {
-                        detailsListener.onDetailsReceived(email_text, password_text, SIGNUP_REQUEST);
-                    } else {
-                        Toast.makeText(v.getContext(), "Email or Password field not correct!", Toast.LENGTH_SHORT).show();
-                    }
+                if (nullCheck() && validCheck()) {
+                    Toast.makeText(v.getContext(), "Please Wait...", Toast.LENGTH_SHORT).show();
+                    detailsListener.onDetailsReceived(email_text, password_text, SIGNUP_REQUEST);
+                } else {
+                    Toast.makeText(v.getContext(), "Email or Password field not correct!", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
     }

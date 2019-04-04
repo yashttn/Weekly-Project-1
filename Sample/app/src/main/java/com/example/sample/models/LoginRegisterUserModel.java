@@ -1,10 +1,9 @@
-package com.example.sample.Models;
+package com.example.sample.models;
 
-import com.example.sample.Models.BaseResponseModel;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class RegisterUserModel extends BaseResponseModel {
+public class LoginRegisterUserModel extends BaseResponseModel {
 
     @SerializedName("email")
     @Expose
@@ -13,7 +12,7 @@ public class RegisterUserModel extends BaseResponseModel {
     @Expose
     private String password;
 
-    public RegisterUserModel(String email, String password) {
+    public LoginRegisterUserModel(String email, String password) {
         super();
         this.email = email;
         this.password = password;

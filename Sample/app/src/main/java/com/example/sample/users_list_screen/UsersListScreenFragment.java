@@ -1,13 +1,11 @@
-package com.example.sample.UsersListScreen;
+package com.example.sample.users_list_screen;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Toast;
 
-import com.example.sample.Models.UsersModel;
+import com.example.sample.models.UsersModel;
 import com.example.sample.R;
 
 import java.util.ArrayList;
@@ -28,10 +26,9 @@ public class UsersListScreenFragment extends Fragment {
     RecyclerView usersListRV;
     UsersListAdapter usersListAdapter;
     List<UsersModel> usersData;
-    Bundle bundle;
     LinearLayoutManager linearLayoutManager;
-    boolean isScrolling = false;
     IDataChangeListener dataChangeListener;
+    boolean isScrolling = false;
 
     public void setDataChangeListener(IDataChangeListener dataChangeListener) {
         this.dataChangeListener = dataChangeListener;
@@ -48,29 +45,23 @@ public class UsersListScreenFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_users_list_screen, container, false);
-        usersListRV = view.findViewById(R.id.users_list_rv);
-        linearLayoutManager = new LinearLayoutManager(getActivity());
-        usersListRV.setLayoutManager(linearLayoutManager);
-        usersListAdapter = new UsersListAdapter(usersData);
-        usersListRV.setAdapter(usersListAdapter);
-        usersListRV.setHasFixedSize(true);
+
+        buildUsersList(view);
         return view;
+    }
+
+    private void buildUsersList(View view){
+        usersListRV = view.findViewById(R.id.users_list_rv);
+        linearLayoutManager = new LinearLayoutManager(view.getContext());
+        usersListRV.setLayoutManager(linearLayoutManager);
+        usersListAdapter = new UsersListAdapter();
+        usersListAdapter.setUsersModelList(usersData);
+        usersListRV.setAdapter(usersListAdapter);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        bundle = getArguments();
-        if (bundle != null) {
-            List<UsersModel> modelList = bundle.getParcelableArrayList("users_list");
-            usersData.addAll(modelList);
-        }
-        usersListAdapter.notifyDataSetChanged();
 
         usersListRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -91,10 +82,16 @@ public class UsersListScreenFragment extends Fragment {
                 if (isScrolling && visibleItems + scrolledOutItems == totalItems) {
                     Toast.makeText(getActivity(), "Loading ...", Toast.LENGTH_LONG).show();
                     isScrolling = false;
-                    dataChangeListener.getMoreData(totalItems);
+                    dataChangeListener.getMoreData();
                 }
             }
         });
+    }
+
+    public void setUsersData(List<UsersModel> usersModelList) {
+        this.usersData = usersModelList;
+        usersListAdapter.setUsersModelList(usersModelList);
+        usersListAdapter.notifyDataSetChanged();
     }
 
     @Override
