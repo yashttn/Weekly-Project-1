@@ -21,7 +21,7 @@ import com.example.sample.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsersListScreenFragment extends Fragment {
+public class UsersListScreenFragment extends Fragment implements IUserDetailsListener {
 
     RecyclerView usersListRV;
     UsersListAdapter usersListAdapter;
@@ -38,7 +38,6 @@ public class UsersListScreenFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        usersData = new ArrayList<>();
     }
 
     @Nullable
@@ -50,11 +49,13 @@ public class UsersListScreenFragment extends Fragment {
         return view;
     }
 
-    private void buildUsersList(View view){
+    private void buildUsersList(View view) {
         usersListRV = view.findViewById(R.id.users_list_rv);
         linearLayoutManager = new LinearLayoutManager(view.getContext());
         usersListRV.setLayoutManager(linearLayoutManager);
         usersListAdapter = new UsersListAdapter();
+        usersListAdapter.setUserDetailsListener(this);
+        usersData = new ArrayList<>();
         usersListAdapter.setUsersModelList(usersData);
         usersListRV.setAdapter(usersListAdapter);
     }
@@ -69,7 +70,6 @@ public class UsersListScreenFragment extends Fragment {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
                     isScrolling = true;
-
                 }
             }
 
@@ -80,8 +80,8 @@ public class UsersListScreenFragment extends Fragment {
                 int visibleItems = linearLayoutManager.getChildCount();
                 int scrolledOutItems = linearLayoutManager.findFirstVisibleItemPosition();
                 if (isScrolling && visibleItems + scrolledOutItems == totalItems) {
-                    Toast.makeText(getActivity(), "Loading ...", Toast.LENGTH_LONG).show();
                     isScrolling = false;
+                    Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
                     dataChangeListener.getMoreData();
                 }
             }
@@ -89,9 +89,8 @@ public class UsersListScreenFragment extends Fragment {
     }
 
     public void setUsersData(List<UsersModel> usersModelList) {
-        this.usersData = usersModelList;
-        usersListAdapter.setUsersModelList(usersModelList);
-        usersListAdapter.notifyDataSetChanged();
+        usersData.addAll(usersModelList);
+        usersListAdapter.setUsersModelList(usersData);
     }
 
     @Override
@@ -119,4 +118,10 @@ public class UsersListScreenFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void userDetailsClicked(UsersModel usersModel) {
+        if (dataChangeListener != null) {
+            dataChangeListener.showUserDetails(usersModel);
+        }
+    }
 }

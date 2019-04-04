@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.sample.data_manager.DataManager;
@@ -16,6 +17,7 @@ import com.example.sample.login_screen.IDetailsListener;
 import com.example.sample.login_screen.LoginScreenFragment;
 import com.example.sample.models.UsersModel;
 import com.example.sample.splash_screen.SplashScreenFragment;
+import com.example.sample.user_details_screen.UserDetailsScreenFragment;
 import com.example.sample.users_list_screen.IDataChangeListener;
 import com.example.sample.users_list_screen.UsersListScreenFragment;
 
@@ -33,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
     SQLiteDatabase database;
     LoginScreenFragment loginScreenFragment;
     UsersListScreenFragment usersListScreenFragment;
+    UserDetailsScreenFragment userDetailsScreenFragment;
+    int pageNo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +44,8 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
         setContentView(R.layout.activity_main);
 
         starters();
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (isFirstTime()) {
+        if (!isFirstTime()) {
             showSplashScreen();
         } else {
             if (isSignedIn()) {
@@ -66,11 +66,15 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
     }
 
     private boolean isFirstTime() {
-        return !preferences.contains("first_time");
+        if (preferences.contains("first_time")) {
+            return preferences.getBoolean("first_time", false);
+        } else return false;
     }
 
     private boolean isSignedIn() {
-        return !preferences.contains("signed_in");
+        if (preferences.contains("signed_in")) {
+            return preferences.getBoolean("signed_in", false);
+        } else return false;
     }
 
     private void showSplashScreen() {
@@ -99,9 +103,13 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, usersListScreenFragment).addToBackStack(null).commit();
 
-        int pageNo = preferences.getInt("page_no", 1);
-        dataManager.getUsersListRequest(pageNo);
-        preferences.edit().putInt("page_no", pageNo + 1).apply();
+        pageNo = preferences.getInt("page_no", 1);
+        if (pageNo < 4) {
+            dataManager.getUsersListRequest(pageNo);
+            preferences.edit().putInt("page_no", pageNo + 1).apply();
+        } else {
+            Log.v("yash", "pageNo" + pageNo);
+        }
     }
 
     @Override
@@ -111,7 +119,22 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
 
     @Override
     public void getMoreData() {
-        dataManager.getUsersListRequest(preferences.getInt("page_no", 1));
+        if (pageNo < 3) {
+            pageNo = preferences.getInt("page_no", 1);
+            dataManager.getUsersListRequest(pageNo);
+            preferences.edit().putInt("page_no", pageNo + 1).apply();
+        }
+    }
+
+    @Override
+    public void showUserDetails(UsersModel usersModel) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("users_model", usersModel);
+        userDetailsScreenFragment = new UserDetailsScreenFragment();
+        userDetailsScreenFragment.setArguments(bundle);
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.hide(usersListScreenFragment);
+        fragmentTransaction.add(R.id.fragment_container, userDetailsScreenFragment).addToBackStack(null).commit();
     }
 
     @Override
@@ -138,6 +161,12 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
                 Toast.makeText(this, "Login Failed", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        preferences.edit().putInt("page_no", 1).apply();
     }
 
     @Override

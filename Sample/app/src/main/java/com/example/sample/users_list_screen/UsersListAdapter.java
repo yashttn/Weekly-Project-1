@@ -17,6 +17,7 @@ import java.util.List;
 public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.UsersListViewHolder> {
 
     private List<UsersModel> usersModelList;
+    private IUserDetailsListener userDetailsListener;
 
     @NonNull
     @Override
@@ -26,12 +27,21 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
 
     @Override
     public void onBindViewHolder(@NonNull UsersListViewHolder usersListViewHolder, int position) {
-        UsersModel usersModel = usersModelList.get(position);
-        usersListViewHolder.user_id_tv.setText("" + usersModel.getId());
+        final UsersModel usersModel = usersModelList.get(position);
+        usersListViewHolder.user_id_tv.setText(String.valueOf(usersModel.getId()));
         usersListViewHolder.first_name_tv.setText(usersModel.getFirstName());
         usersListViewHolder.last_name_tv.setText(usersModel.getLastName());
         Glide.with(usersListViewHolder.itemView.getContext())
                 .load(usersModel.getAvatar()).into(usersListViewHolder.profile_image_iv);
+
+        usersListViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (userDetailsListener != null) {
+                    userDetailsListener.userDetailsClicked(usersModel);
+                }
+            }
+        });
     }
 
     void setUsersModelList(List<UsersModel> usersModelList) {
@@ -42,6 +52,10 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
     @Override
     public int getItemCount() {
         return usersModelList.size();
+    }
+
+    public void setUserDetailsListener(IUserDetailsListener userDetailsListener) {
+        this.userDetailsListener = userDetailsListener;
     }
 
     class UsersListViewHolder extends RecyclerView.ViewHolder {
