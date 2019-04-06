@@ -9,8 +9,8 @@
         android:id="@+id/option_menu_update_user"
         android:title="Update User" />
     <item
-        android:id="@+id/option_menu_delete_user"
-        android:title="Delete User" />
+        android:id="@+id/remove_data"
+        android:title="Remove Data From DB" />
     <item
         android:id="@+id/option_menu_logout_user"
         android:title="Logout" />

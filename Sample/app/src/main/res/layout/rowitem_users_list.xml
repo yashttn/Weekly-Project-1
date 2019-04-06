@@ -114,24 +114,16 @@
 
             <ImageView
                 android:id="@+id/share_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_margin="17dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="20dp"
                 android:src="@mipmap/share_icon" />
-
-
-            <ImageView
-                android:id="@+id/update_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginTop="17dp"
-                android:src="@mipmap/update_icon" />
 
             <ImageView
                 android:id="@+id/delete_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_margin="17dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_margin="20dp"
                 android:src="@mipmap/delete_icon" />
         </LinearLayout>
 

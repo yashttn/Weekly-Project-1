@@ -1,9 +1,13 @@
 package com.example.sample.users_list_screen;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,6 +24,9 @@ import com.example.sample.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.sample.global_constants.GlobalConstants.ADD_USER_REQUEST;
+import static com.example.sample.global_constants.GlobalConstants.UPDATE_USER_REQUEST;
 
 public class UsersListScreenFragment extends Fragment implements IUserDetailsListener {
 
@@ -81,7 +88,6 @@ public class UsersListScreenFragment extends Fragment implements IUserDetailsLis
                 int scrolledOutItems = linearLayoutManager.findFirstVisibleItemPosition();
                 if (isScrolling && visibleItems + scrolledOutItems == totalItems) {
                     isScrolling = false;
-                    Toast.makeText(getActivity(), "Loading...", Toast.LENGTH_SHORT).show();
                     dataChangeListener.getMoreData();
                 }
             }
@@ -91,6 +97,7 @@ public class UsersListScreenFragment extends Fragment implements IUserDetailsLis
     public void setUsersData(List<UsersModel> usersModelList) {
         usersData.addAll(usersModelList);
         usersListAdapter.setUsersModelList(usersData);
+        usersListAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -104,15 +111,15 @@ public class UsersListScreenFragment extends Fragment implements IUserDetailsLis
         switch (item.getItemId()) {
             case R.id.option_menu_add_user:
                 Toast.makeText(getActivity(), item.getTitle(), Toast.LENGTH_SHORT).show();
+                dataChangeListener.addUpdateUserNameJob(ADD_USER_REQUEST);
                 break;
             case R.id.option_menu_update_user:
                 Toast.makeText(getActivity(), item.getTitle(), Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.option_menu_delete_user:
-                Toast.makeText(getActivity(), item.getTitle(), Toast.LENGTH_SHORT).show();
+                dataChangeListener.addUpdateUserNameJob(UPDATE_USER_REQUEST);
                 break;
             case R.id.option_menu_logout_user:
                 Toast.makeText(getActivity(), item.getTitle(), Toast.LENGTH_SHORT).show();
+                confirmLogout(getActivity());
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -123,5 +130,41 @@ public class UsersListScreenFragment extends Fragment implements IUserDetailsLis
         if (dataChangeListener != null) {
             dataChangeListener.showUserDetails(usersModel);
         }
+    }
+
+    @Override
+    public void deleteUser(int user_id) {
+        if (dataChangeListener != null) {
+            dataChangeListener.deleteUserDetails(user_id);
+        }
+    }
+
+    @Override
+    public void shareUser(UsersModel usersModel) {
+        if (dataChangeListener != null) {
+            dataChangeListener.shareUserDetails(usersModel);
+        }
+    }
+
+    private void confirmLogout(Context context) {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        dataChangeListener.logoutUser();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Do you really want to Logout?").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
     }
 }
