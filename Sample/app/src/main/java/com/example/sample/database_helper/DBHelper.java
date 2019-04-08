@@ -54,4 +54,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public void deleteAllDataFromDB(SQLiteDatabase database) {
         database.execSQL(DELETE_DATA_COMMAND);
     }
+
+    public void deleteUserFromDB(int user_id, SQLiteDatabase database) {
+        database.delete(TABLE_NAME, COLUMN_ID + " = ?",
+                new String[]{String.valueOf(user_id)});
+    }
 }

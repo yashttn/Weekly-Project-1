@@ -31,7 +31,7 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final UsersListViewHolder usersListViewHolder, int position) {
+    public void onBindViewHolder(@NonNull final UsersListViewHolder usersListViewHolder, final int position) {
         final UsersModel usersModel = usersModelList.get(position);
         usersListViewHolder.user_id_tv.setText(String.valueOf(usersModel.getId()));
         usersListViewHolder.first_name_tv.setText(usersModel.getFirstName());
@@ -68,6 +68,8 @@ public class UsersListAdapter extends RecyclerView.Adapter<UsersListAdapter.User
             public void onClick(View v) {
                 if (userDetailsListener != null) {
                     userDetailsListener.deleteUser(usersModel.getId());
+                    usersModelList.remove(position);
+                    notifyDataSetChanged();
                 }
             }
         });

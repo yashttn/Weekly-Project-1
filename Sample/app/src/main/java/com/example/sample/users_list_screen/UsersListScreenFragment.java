@@ -94,6 +94,12 @@ public class UsersListScreenFragment extends Fragment implements IUserDetailsLis
         });
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        dataChangeListener.getMoreData();
+    }
+
     public void setUsersData(List<UsersModel> usersModelList) {
         usersData.addAll(usersModelList);
         usersListAdapter.setUsersModelList(usersData);

@@ -1,17 +1,20 @@
 package com.example.sample;
 
+import android.Manifest;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
     ConstraintLayout mainActivityConstraintLayout;
     int pageNo;
     boolean isConnected;
+    private static final int PERMISSIONS_READ_WRITE_EXTERNAL_STORAGE = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,12 +85,17 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.setOnNetworkStateChanged(this);    // Connecting IOnNetworkStateChanged
         mainActivityConstraintLayout = findViewById(R.id.main_activity_constraint_layout);
+        if (pageNo == 0) {
+            pageNo = 1;
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        pageNo = 1;
+        if (pageNo == 0) {
+            pageNo = 1;
+        }
     }
 
     private boolean isFirstTime() {
@@ -130,9 +139,11 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
 
     @Override
     public void onUsersListReceived(List<UsersModel> usersModelList) {
-        if (fragmentManager.getFragments().size() > 0) {
-            if (fragmentManager.getFragments().get(0) instanceof UsersListScreenFragment)
-                usersListScreenFragment.setUsersData(usersModelList);
+        if (usersModelList.size() != 0) {
+            usersListScreenFragment.setUsersData(usersModelList);
+            pageNo++;
+        } else {
+            Toast.makeText(this, "No Data Received!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -161,18 +172,9 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
 
     @Override
     public void getMoreData() {
-        if (pageNo <= 4) {
-            Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
-            if (isConnected) dataManager.getUsersListRequest(pageNo++, dbHelper, database);
-            else dataManager.getUsersListFromDB(pageNo++, dbHelper, database);
-        }
-    }
-
-    private void makeUsersListRequest() {
-        if (pageNo <= 4) {
-            if (isConnected) dataManager.getUsersListRequest(pageNo++, dbHelper, database);
-            else dataManager.getUsersListFromDB(pageNo++, dbHelper, database);
-        }
+        Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
+        if (isConnected) dataManager.getUsersListRequest(pageNo, dbHelper, database);
+        else dataManager.getUsersListFromDB(pageNo, dbHelper, database);
     }
 
     @Override
@@ -198,14 +200,45 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
 
     @Override
     public void deleteUserDetails(int user_id) {
-        if (isConnected) dataManager.deleteUserRequest(user_id);
-        else Toast.makeText(this, "No Internet Connection!", Toast.LENGTH_SHORT).show();
+        if (isConnected) dataManager.deleteUserRequest(user_id, dbHelper, database);
+        else {
+            dbHelper.deleteUserFromDB(user_id, database);
+        }
     }
 
     @Override
     public void shareUserDetails(UsersModel usersModel) {
-        if (isConnected) dataManager.shareUserRequest(this, usersModel);
-        else Toast.makeText(this, "No Internet Connection!", Toast.LENGTH_SHORT).show();
+        if (isConnected) {
+            askingPermissions();
+            dataManager.shareUserRequest(this, usersModel);
+        } else Toast.makeText(this, "No Internet Connection!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void askingPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSIONS_READ_WRITE_EXTERNAL_STORAGE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSIONS_READ_WRITE_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permission Granted!", Toast.LENGTH_SHORT).show();
+                } else {
+                    askingPermissions();
+                }
+                break;
+        }
     }
 
     @Override
@@ -284,8 +317,6 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
             View view = snackbar.getView();
             snackbarText = view.findViewById(android.support.design.R.id.snackbar_text);
             view.setBackgroundColor(Color.argb(255, 0, 150, 100));
-
-
         } else {
             networkConnected = "No Internet Connection!";
             snackbar = Snackbar.make(mainActivityConstraintLayout, networkConnected, Snackbar.LENGTH_INDEFINITE);
@@ -293,13 +324,8 @@ public class MainActivity extends AppCompatActivity implements IDetailsListener,
             snackbarText = view.findViewById(android.support.design.R.id.snackbar_text);
             view.setBackgroundColor(Color.argb(255, 178, 34, 34));
         }
-        if (fragmentManager.getFragments().size() > 0) {
-            if (fragmentManager.getFragments().get(0) instanceof UsersListScreenFragment)
-                makeUsersListRequest();
-        }
         snackbarText.setTextSize(15);
         snackbar.show();
     }
-
 
 }

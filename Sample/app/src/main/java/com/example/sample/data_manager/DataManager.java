@@ -9,7 +9,6 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
-import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -153,7 +152,7 @@ public class DataManager {
         this.onResponseListener = onResponseListener;
     }
 
-    public void deleteUserRequest(int user_id) {
+    public void deleteUserRequest(int user_id, DBHelper dbHelper, SQLiteDatabase database) {
         ApiInterface apiInterface = RetrofitClientInstance.getRetrofitInstance().create(ApiInterface.class);
 
         Call<Void> data = apiInterface.deleteUser(user_id);
@@ -172,6 +171,7 @@ public class DataManager {
             }
         });
 
+        dbHelper.deleteUserFromDB(user_id, database);
     }
 
     public void shareUserRequest(Context context, UsersModel usersModel) {

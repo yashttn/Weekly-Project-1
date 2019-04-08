@@ -1,7 +1,5 @@
 package com.example.sample.users_list_screen;
 
-import android.graphics.Bitmap;
-
 import com.example.sample.models.UsersModel;
 
 public interface IDataChangeListener {
@@ -16,4 +14,5 @@ public interface IDataChangeListener {
     void shareUserDetails(UsersModel usersModel);
 
     void logoutUser();
+
 }
